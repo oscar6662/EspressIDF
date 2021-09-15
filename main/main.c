@@ -8,25 +8,30 @@
 
 const TickType_t read_delay = 50 / portTICK_PERIOD_MS;
 
-// serial_out(..) method assumes string is null-terminated but does not
-//	have the specification-mandated newline terminator.  This method applies
-//	the newline terminator and writes the string over the serial connection.
 void serial_out(const char* string) {
 	int end = strlen(string);
 	if (end >= MSG_BUFFER_LENGTH) {
 		// Error: Output too long.
 		return;
 	}
-
-	// NOTE: Working spec requires max of 256 bytes containing a newline terminator.
-	//	Thus the storage buffer needs 256+1 bytes since we also need a null terminator
-	//	to form a valid string.
 	char msg_buffer[MSG_BUFFER_LENGTH+1];
 	memset(msg_buffer, 0, MSG_BUFFER_LENGTH+1);
 	strcpy(msg_buffer, string);
 	msg_buffer[end] = '\n';
 	printf(msg_buffer);
 	fflush(stdout);
+}
+
+void check_what_came_in (const char * string) {
+	char ping[4] = "ping";
+	char pong[4] = "pong";
+	for (int i = 0; i < 3; i ++) {
+		if(string[i] != ping[i]) {
+			return;
+		} 
+	}
+	serial_out(pong);
+	serial_out("");
 }
 
 void app_main(void)
@@ -58,7 +63,6 @@ void app_main(void)
 		}
 
 		// Echo query back.
-		serial_out(query);
-		serial_out("");
+		check_what_came_in(query);
 	}
 }
