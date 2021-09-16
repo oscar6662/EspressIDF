@@ -8,6 +8,8 @@
 
 const TickType_t read_delay = 50 / portTICK_PERIOD_MS;
 
+char error[256] = "success";
+
 void serial_out(const char* string) {
 	int end = strlen(string);
 	if (end >= MSG_BUFFER_LENGTH) {
@@ -21,25 +23,62 @@ void serial_out(const char* string) {
 	printf(msg_buffer);
 	fflush(stdout);
 }
-void print_mac(const unsigned char *mac) {
-	printf("%02X:%02X:%02X:%02X:%02X:%02X", mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+
+void print_mac() {
+  unsigned char mac[6] = {0};
+  char readytoprint[18];
+  esp_efuse_mac_get_default(mac);
+  sprintf(readytoprint,"%02X:%02X:%02X:%02X:%02X:%02X", mac[0],mac[1],mac[2],mac[3],mac[4],mac[5]);
+	serial_out(readytoprint);
 }
 
-void check_what_came_in (const char * string) {
- 	unsigned char mac_base[6] = {0};
-    esp_efuse_mac_get_default(mac_base);
-    printf("MAC Address: ");
-    print_mac(mac_base);
-	char ping[4] = "ping";
-	char pong[4] = "pong";
-	char mac[3] = "mac"; 
-	for (int i = 0; i < 3; i ++) {
-		if(string[i] != ping[i]) {
-			return;
-		} 
-	}
+void print_pong () {
+  serial_out("pong");
+}
 
-	serial_out(pong);
+void print_id () {
+  serial_out("s107");
+}
+
+void print_version () {
+  serial_out("1.0.0");
+}
+
+void print_error () {
+  serial_out(error);
+}
+
+struct variable {
+  char name[17];
+  int value;
+}
+
+void store_variable (char * first, int second) {
+  struct variable fist;
+  first.name = first;
+  first.value = second;
+}
+
+void check_what_came_in (char * string) {
+  printf("%s\n",string);
+  char * string_with_arguments = strtok(string," ");
+  if (strcasecmp(string,"ping") == 0) {
+    print_pong();
+  } else if (strcasecmp(string,"mac") == 0) {
+    print_mac();
+  } else if (strcasecmp(string,"id") == 0) {
+    print_id();
+  } else if (strcasecmp(string,"version") == 0) {
+    print_version();
+  } else if (strcasecmp(string,"error") == 0) {
+    print_error();
+  } else if (strcasecmp(string_with_arguments,"store") == 0) {
+    char * first_argument = strtok(NULL," ");
+    char * second_argument = strtok(NULL," ");
+    store_variable(first_argument,second_argument);
+  }else {
+    sprintf(error, "Command \"%s\" not recognized",string);
+  }
 	serial_out("");
 }
 
@@ -71,7 +110,6 @@ void app_main(void)
 			}
 		}
 
-		// Echo query back.
 		check_what_came_in(query);
 	}
 }
