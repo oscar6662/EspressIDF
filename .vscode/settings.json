@@ -2,6 +2,19 @@
   "C_Cpp.intelliSenseEngine": "Tag Parser",
   "files.associations": {
     "*.ipp": "c",
-    "string": "c"
+    "string": "c",
+    "optional": "c",
+    "istream": "c",
+    "ostream": "c",
+    "ratio": "c",
+    "system_error": "c",
+    "array": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c",
+    "freertos.h": "c",
+    "typeinfo": "c",
+    "global.h": "c"
   }
 }
